@@ -4,8 +4,16 @@
     right: 16px;
     bottom: 16px;
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 6px;
+    justify-content: flex-end;
+    gap: 6px 10px;
+    padding: 8px 10px;
+    border-radius: 12px;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.15);
+    max-width: min(96vw, 520px);
     z-index: 2147483647;
   }
 
@@ -99,6 +107,11 @@
     padding: 8px 10px;
   }
 
+  #nv-fullscreen-button {
+    min-width: 64px;
+    padding: 8px 12px;
+  }
+
   .nv-control-button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -106,8 +119,8 @@
   
   /* 縦書きビューア */
   .nv-vertical-enabled {
-    --nv-viewer-height: min(80vh, 640px);
-    --nv-viewer-width: min(90vw, 660px);
+    --nv-viewer-height: min(90vh, 820px);
+    --nv-viewer-width: min(92vw, 760px);
     writing-mode: vertical-rl;
     text-orientation: upright;
     line-height: 1.85;
@@ -115,8 +128,8 @@
     height: var(--nv-viewer-height);
     max-width: var(--nv-viewer-width);
     width: 100%;
-    margin: 24px auto;
-    padding: 24px;
+    margin: 32px auto;
+    padding: 32px;
     overflow-x: auto;
     overflow-y: hidden;
     border: 1px solid rgba(8, 19, 26, 0.12);
@@ -130,14 +143,14 @@
   .nv-vertical-enabled > * {
     scroll-snap-align: start;
   }
-  
+
   .nv-vertical-enabled figure,
   .nv-vertical-enabled img,
   .nv-vertical-enabled video,
   .nv-vertical-enabled iframe {
     writing-mode: horizontal-tb;
     width: 100%;
-    margin: 0 auto 24px;
+    margin: 0 auto 32px;
     display: block;
   }
   
@@ -147,13 +160,13 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 12px;
-    min-width: calc(var(--nv-viewer-width) - 48px);
-    max-width: calc(var(--nv-viewer-width) - 48px);
-    min-height: calc(var(--nv-viewer-height) - 48px);
-    max-height: calc(var(--nv-viewer-height) - 48px);
-    margin: 0 auto 24px;
-    padding: 16px;
+    gap: 16px;
+    min-width: calc(var(--nv-viewer-width) - 64px);
+    max-width: calc(var(--nv-viewer-width) - 64px);
+    min-height: calc(var(--nv-viewer-height) - 64px);
+    max-height: calc(var(--nv-viewer-height) - 64px);
+    margin: 0 auto 32px;
+    padding: 20px;
     box-sizing: border-box;
     border-radius: 12px;
     border: 1px solid rgba(8, 19, 26, 0.08);
@@ -185,10 +198,10 @@
     writing-mode: vertical-rl;
     text-orientation: upright;
     display: block;
-    width: calc(var(--nv-viewer-width) - 48px);
-    height: calc(var(--nv-viewer-height) - 48px);
-    margin: 0 auto 24px;
-    padding: 24px;
+    width: calc(var(--nv-viewer-width) - 64px);
+    height: calc(var(--nv-viewer-height) - 64px);
+    margin: 0 auto 32px;
+    padding: 28px;
     box-sizing: border-box;
     overflow: auto;
     border-radius: 12px;
@@ -233,8 +246,8 @@
   }
   
   .nv-viewer-nav {
-    width: min(90vw, 660px);
-    margin: 8px auto 32px;
+    width: min(92vw, 760px);
+    margin: 12px auto 40px;
     display: none;
     justify-content: space-between;
     gap: 16px;
@@ -274,3 +287,40 @@
     font-family: "ヒラギノ角ゴ ProN", "Hiragino Kaku Gothic ProN", "游ゴシック体", "游ゴシック", "Yu Gothic", "YuGothic", "メイリオ", "Meiryo", "MS Pゴシック", "MS PGothic", sans-serif !important;
   }
 
+  /* 全画面表示 */
+  body.nv-body-fullscreen {
+    overflow: hidden !important;
+  }
+
+  .nv-vertical-enabled.nv-fullscreen {
+    --nv-viewer-height: calc(100vh - 120px);
+    --nv-viewer-width: min(100vw - 96px, 1100px);
+    position: fixed;
+    inset: 0;
+    margin: 0 auto;
+    padding: 48px 56px 96px 56px;
+    max-width: none;
+    max-height: none;
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+    background: #fff;
+    z-index: 2147482000;
+  }
+
+  .nv-viewer-nav--fullscreen {
+    position: fixed;
+    left: 50%;
+    bottom: 32px;
+    transform: translateX(-50%);
+    width: min(100vw - 120px, 820px);
+    margin: 0;
+    z-index: 2147483000;
+  }
+
+  .nv-body-fullscreen #nv-control-panel {
+    right: 24px;
+    bottom: 24px;
+  }

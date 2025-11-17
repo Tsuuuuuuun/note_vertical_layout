@@ -11,18 +11,23 @@
     const STATE_KEY = "noteVerticalEnabled";
     const FONT_STATE_KEY = "noteVerticalFontSerif";
     const FONT_SIZE_STATE_KEY = "noteVerticalFontSize";
+    const FULLSCREEN_STATE_KEY = "noteVerticalFullscreen";
     const CONTROL_PANEL_ID = "nv-control-panel";
     const BUTTON_ID = "nv-toggle-button";
     const FONT_BUTTON_ID = "nv-font-button";
     const FONT_SIZE_MINUS_BUTTON_ID = "nv-font-size-minus";
     const FONT_SIZE_PLUS_BUTTON_ID = "nv-font-size-plus";
+    const FULLSCREEN_BUTTON_ID = "nv-fullscreen-button";
     const VIEWER_NAV_ID = "nv-viewer-nav";
     const NAV_VISIBLE_CLASS = "nv-viewer-nav--visible";
+    const NAV_FULLSCREEN_CLASS = "nv-viewer-nav--fullscreen";
     const MEDIA_PAGE_CLASS = "nv-page-block";
     const QUOTE_PAGE_CLASS = "nv-quote-block";
     const MEDIA_BLOCK_SELECTOR = "figure";
     const QUOTE_BLOCK_SELECTOR = "blockquote";
     const PAGE_BREAK_CLASS = "nv-page-break";
+    const FULLSCREEN_CLASS = "nv-fullscreen";
+    const BODY_FULLSCREEN_CLASS = "nv-body-fullscreen";
     const FONT_SIZES = [8, 10, 12, 14, 15, 16, 18, 20];
     const DEFAULT_FONT_SIZE_INDEX = 4;
   
@@ -57,8 +62,17 @@
 
     const saveFontSizeState = (sizeIndex: number) =>
       sessionStorage.setItem(FONT_SIZE_STATE_KEY, String(sizeIndex));
+
+    const loadFullscreenState = (): boolean =>
+      sessionStorage.getItem(FULLSCREEN_STATE_KEY) === "true";
+
+    const saveFullscreenState = (enabled: boolean) =>
+      sessionStorage.setItem(FULLSCREEN_STATE_KEY, String(enabled));
   
     type PageDirection = "prev" | "next";
+
+    let fullscreenKeyHandler: ((event: KeyboardEvent) => void) | null = null;
+    let fullscreenButtonRef: HTMLButtonElement | null = null;
   
     const scrollViewerPage = (direction: PageDirection) => {
       const article = getArticle();
@@ -173,6 +187,52 @@
         article.scrollLeft = enabled ? startPosition : 0;
       });
     };
+
+    const applyFullscreenState = (enabled: boolean) => {
+      if (fullscreenButtonRef) {
+        fullscreenButtonRef.setAttribute("aria-pressed", String(enabled));
+        fullscreenButtonRef.setAttribute(
+          "aria-label",
+          enabled ? "全画面を終了" : "全画面で表示"
+        );
+      }
+
+      document.body.classList.toggle(BODY_FULLSCREEN_CLASS, enabled);
+
+      const article = getArticle();
+      if (article) {
+        article.classList.toggle(FULLSCREEN_CLASS, enabled);
+
+        const nav = document.getElementById(VIEWER_NAV_ID);
+        if (nav) nav.classList.toggle(NAV_FULLSCREEN_CLASS, enabled);
+      }
+
+      if (enabled && !fullscreenKeyHandler) {
+        fullscreenKeyHandler = (event: KeyboardEvent) => {
+          if (event.key === "Escape") {
+            event.preventDefault();
+            setFullscreenState(false);
+          }
+        };
+        document.addEventListener("keydown", fullscreenKeyHandler);
+      } else if (!enabled && fullscreenKeyHandler) {
+        document.removeEventListener("keydown", fullscreenKeyHandler);
+        fullscreenKeyHandler = null;
+      }
+    };
+
+    const setFullscreenState = (enabled: boolean, persist = true) => {
+      const article = getArticle();
+      const canEnableFullscreen =
+        !!article && article.classList.contains("nv-vertical-enabled");
+
+      if (enabled && !canEnableFullscreen) {
+        enabled = false;
+      }
+
+      if (persist) saveFullscreenState(enabled);
+      applyFullscreenState(enabled);
+    };
   
     const applyFontState = (isSerif: boolean) => {
       const article = getArticle();
@@ -197,6 +257,14 @@
       article.classList.toggle("nv-vertical-enabled", enabled);
       updateMediaBlocks(article, enabled);
       setViewerState(article, enabled);
+
+      if (!enabled) {
+        setFullscreenState(false);
+      }
+
+      if (fullscreenButtonRef) {
+        fullscreenButtonRef.disabled = !enabled;
+      }
     };
   
     const createToggleButton = (initialState: boolean): HTMLButtonElement => {
@@ -278,6 +346,24 @@
       updateButtons();
       return [minusButton, plusButton];
     };
+
+    const createFullscreenButton = (initialState: boolean): HTMLButtonElement => {
+      const button = document.createElement("button");
+      button.id = FULLSCREEN_BUTTON_ID;
+      button.type = "button";
+      button.className = "nv-control-button";
+      button.textContent = "全画面";
+      button.title = "全画面で表示（Escで解除）";
+      button.setAttribute("aria-label", initialState ? "全画面を終了" : "全画面で表示");
+      button.setAttribute("aria-pressed", String(initialState));
+
+      button.addEventListener("click", () => {
+        const newState = button.getAttribute("aria-pressed") !== "true";
+        setFullscreenState(newState);
+      });
+
+      return button;
+    };
   
     const injectUI = () => {
       if (document.getElementById(CONTROL_PANEL_ID)) return; // 多重挿入防止
@@ -285,6 +371,7 @@
       const initialState = loadState();
       const initialFontState = loadFontState();
       const initialFontSizeIndex = loadFontSizeState();
+      const initialFullscreenState = loadFullscreenState();
 
       const panel = document.createElement("div");
       panel.id = CONTROL_PANEL_ID;
@@ -292,6 +379,8 @@
       const toggleButton = createToggleButton(initialState);
       const fontButton = createFontButton(initialFontState);
       const [fontSizeMinusButton, fontSizePlusButton] = createFontSizeButtons(initialFontSizeIndex);
+      const fullscreenButton = createFullscreenButton(initialFullscreenState);
+      fullscreenButtonRef = fullscreenButton;
 
       // ラベルを作成
       const toggleLabel = document.createElement("span");
@@ -308,11 +397,13 @@
       panel.appendChild(fontButton);
       panel.appendChild(fontSizeMinusButton);
       panel.appendChild(fontSizePlusButton);
+      panel.appendChild(fullscreenButton);
       document.body.appendChild(panel);
 
       applyState(initialState);
       applyFontState(initialFontState);
       applyFontSizeState(initialFontSizeIndex);
+      setFullscreenState(initialFullscreenState, false);
     };
   
     if (document.readyState === "complete" || document.readyState === "interactive") {
