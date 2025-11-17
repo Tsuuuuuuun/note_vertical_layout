@@ -13,10 +13,12 @@
           "https://note.com/*/n/*"
         ],
         "js": [
-          "content_script.js"
+          "amd-loader.js",
+          "content_script.js",
+          "bootstrap.js"
         ],
         "css": [
-          "styles.css"
+          "css/styles.css"
         ],
         "run_at": "document_idle"
       }

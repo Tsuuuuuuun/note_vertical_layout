@@ -1,3 +1,3 @@
 {"scripts": {
-  "build:cs": "tsc content_script.ts --outFile content_script.js --target ES2017 --module amd"
+  "build:cs": "tsc -p tsconfig.json"
 }}

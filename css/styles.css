@@ -149,7 +149,10 @@
   .nv-vertical-enabled video,
   .nv-vertical-enabled iframe {
     writing-mode: horizontal-tb;
-    width: 100%;
+    width: auto;
+    max-width: calc(var(--nv-viewer-width) - 40px);
+    max-height: calc(var(--nv-viewer-height) - 120px);
+    height: auto;
     margin: 0 auto 32px;
     display: block;
   }
@@ -180,8 +183,8 @@
   .nv-vertical-enabled .nv-page-block > picture,
   .nv-vertical-enabled .nv-page-block > video,
   .nv-vertical-enabled .nv-page-block > iframe {
-    max-width: 480px;
-    max-height: 450px;
+    max-width: min(480px, calc(var(--nv-viewer-width) - 120px));
+    max-height: min(450px, calc(var(--nv-viewer-height) - 120px));
     object-fit: contain;
     border-radius: 8px;
     background: #fff;
