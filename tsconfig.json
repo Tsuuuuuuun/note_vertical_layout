@@ -2,8 +2,8 @@
     "compilerOptions": {
       "target": "ES2017",
       "module": "amd",
+      "moduleResolution": "node",
       "outFile": "content_script.js"
     },
-    "files": ["content_script.ts"]
+    "include": ["content_script.ts", "src/**/*.ts"]
   }
-  
